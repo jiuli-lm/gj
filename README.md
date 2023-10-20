@@ -1,2 +1,2 @@
-# gj
-gamejam专用：队名（帮帮我！GPT先生！QAQ）
+# 2023 Ai+ Gamejam
+2023 Ai+ Gamejam - TempName :（帮帮我！GPT先生！QAQ）
