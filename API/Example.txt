@@ -1,0 +1,26 @@
+先将SDApi和TGApi挂载到GameManager上，再通过以下方法调用（API均为单例模式）：
+StartCoroutine(SDApi.Instance.GetImage(Texture t, SDParams s))
+TGApi.Instance.GetText(string s, TGParams t)
+建议在脚本内部使用协程并使用yield return调用API
+需要输出的类型（材质和字符串）需提前定义并传递给方法
+更多可定义参数请参阅SDParams和TGParams类
+下为示例：
+    public IEnumerator Say(Character c,string prompt)
+    {
+        isGenerating = true;
+        string s = "";
+        yield return StartCoroutine(TGApi.Instance.GetText(s, new TGParams(c.prompt, chatroom.history)));
+        chatroom.Push(c, s);
+        isGenerating = false;
+        yield return null;
+    }
+
+    public IEnumerator CreatePortrait(Character c, string prompt)
+    {
+        Texture2D s = c.portrait;
+        yield return StartCoroutine(SDApi.Instance.GetImage(s
+             , new SDParams(c.prompt)));
+        var renderer = gameObject.GetComponent<SpriteRenderer>();
+        renderer.sprite = Sprite.Create(c.portrait, new Rect(0, 0, s.width, s.height), new Vector2(0.5f, 0.5f));
+        yield return null;
+    }
