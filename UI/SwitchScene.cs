@@ -10,6 +10,12 @@ public class SwitchScene : MonoBehaviour
 
     public void SwitchToScene(string sceneName)  
     {  
-        SceneManager.LoadScene(sceneName); 
+        SceneManager.LoadScene(sceneName);
+    }
+
+    public void FinishGame()
+    {
+        SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
+        Application.Quit();
     }
 }

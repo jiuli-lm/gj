@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,134 +7,106 @@ using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    public static GameManager Instance { get; private set; }
+    private List<Data> datas;//数据列表
+    private int dataIndex;
 
-    public Thread chatroom;
+    // public List<Character> characters;
+    // public List<string> names;
+    // public List<string> settings;
+    // public List<string> safewords;
+    // public List<string> prompts;
+    // public List<GameObject> tests;
 
-    private float chatGap = 6f;
-    private float chatMaxGap = 6f;
-    private bool isGenerating = false;
-
-    public List<Character> characters;
-    public List<string> names;
-    public List<string> settings;
-    public List<string> safewords;
-    public List<string> prompts;
-    public List<GameObject> tests;
-
-    [SerializeField]
-    public SDParams prompt;
-
-    // Start is called before the first frame update
+    // [SerializeField]
+    // public SDParams prompt;
+    
     void Awake()
     {
-        if (Instance==null)
+        Instance = this;
+        datas = new List<Data>()
         {
-            Instance = this;
-        }
-
-        if (Instance!=this)
-        {
-            Destroy(this);
-        }
+            new Data()
+            {
+                loadType = 1, spriteName = "背景图片名字",dialogueContent = "文本对话内容"
+            },
+            new Data()
+            {
+                loadType = 2, name = "NPC1" ,dialogueContent = "文本对话"
+            },
+            new Data()
+            {
+                loadType = 2, name = "NPC1" ,dialogueContent = "文本对话2"
+            }
+        };
+        dataIndex = 0;
+        HandleData();
     }
-
-    private void Start()
+    /// <summary>
+    /// 处理data数据
+    /// </summary>
+    private void HandleData()
     {
-        StartCoroutine(GenerateCharacters(3));
-    }
+        if (dataIndex >= datas.Count)
+        {
+            Debug.Log("游戏结束");
+            return;
+        }
 
-    private void Update()
+        if (datas[dataIndex].loadType == 1)
+        {
+            //设置并加载背景
+            SetBG(datas[dataIndex].spriteName);
+            //加载下一条数据
+            LoadNextData();
+        }
+        else
+        {
+            //角色
+            ShowCharacter(datas[dataIndex].name);
+            //更新文本显示内容
+            UpdateTalkLineText(datas[dataIndex].dialogueContent);
+        }
+
+    }
+    /// <summary>
+    /// 设置背景图片资源
+    /// </summary>
+    private void SetBG(string spriteName)
     {
-        if (!isGenerating && chatGap<float.Epsilon)
-        {
-            foreach (var i in characters)
-            {
-                StartCoroutine(Say(i, "Hello!"));
-            }
-        }
-
-        else if (!isGenerating&&chatGap>float.Epsilon)
-        {
-            chatGap -= Time.deltaTime;
-        }
+        UIManager.Instance.SetBGImage(spriteName);
     }
-
-    public IEnumerator Say(Character c,string prompt)
+    
+    /// <summary>
+    /// 加载下一条数据
+    /// </summary>
+    public void LoadNextData()
     {
-        isGenerating = true;
-        string s = "";
-        yield return StartCoroutine(TGApi.Instance.GetText(s, new TGParams(c.prompt, chatroom.history)));
-        chatroom.Push(c, s);
-        isGenerating = false;
-        yield return null;
+        dataIndex++;
+        HandleData();
     }
-
-    private IEnumerator GenerateCharacters(int n)
+    /// <summary>
+    /// 显示角色
+    /// </summary>
+    private void ShowCharacter(string name)
     {
-        characters = new List<Character>();
-        List<int> selected = new List<int>();
-        for (int i=0;i<Mathf.Max(names.Count,settings.Count,safewords.Count,prompts.Count);i++)
-        {
-            selected.Add(0);
-        }
-
-        while(n>0)
-        {
-            Character c = new Character();
-            int j = Random.Range(0, names.Count);
-            while (selected[j] != 0)
-            {
-                j = Random.Range(0, names.Count);
-            }
-            c.name = names[j];
-            selected[j] += 1; 
-            //j = Random.Range(0, names.Count);
-            while (selected[j] >> 1 != 0)
-            {
-                j = Random.Range(0, settings.Count);
-            }
-            c.setting = settings[j];
-            selected[j] += 2;
-            //j = Random.Range(0, names.Count);
-            while (selected[j] >> 2 != 0)
-            {
-                j = Random.Range(0, safewords.Count);
-            }
-            c.safeWord = safewords[j];
-            selected[j] += 4;
-            //j = Random.Range(0, names.Count);
-            while (selected[j] >> 3 != 0)
-            {
-                j = Random.Range(0, prompts.Count);
-            }
-            c.prompt = prompts[j];
-            selected[j] += 8;
-            //j = Random.Range(0, names.Count);
-            characters.Add(c);
-            n--;
-        }
-
-        //for (int i=0;i<characters.Count;i++)
-        foreach (var i in characters)
-        {
-            if (i.portrait.height==0)
-            yield return StartCoroutine(SDApi.Instance.GetImage(i.portrait
-            , new SDParams(i.prompt)));
-
-            chatroom.Push(i, "Hello!");
-        }
-
-        /*
-        StartCoroutine(UIManager.Instance.AlignCharactersInUI());
-        for (int i = 0; i < 3; i++)
-        {
-            var s = tests[i].GetComponent<SpriteRenderer>();
-            s.sprite = Sprite.Create(characters[i].portrait, new Rect(0, 0, characters[i].portrait.width, characters[i].portrait.height), new Vector2(0.5f, 0.5f));
-        }
-        */
-
-        yield return null;
+        UIManager.Instance.ShowCharacter(name);
     }
-
+    /// <summary>
+    /// 更新对话内容
+    /// </summary>
+    private void UpdateTalkLineText(string dialogueContent)
+    {
+        UIManager.Instance.UpdateText(dialogueContent);
+    }
+}
+/// <summary>
+/// 剧情数据类：角色
+/// </summary>
+public class Data
+{
+    public int loadType;//载入的资源类型：1、背景 2、角色
+    public string name;//名字
+    public string spriteName;//图片资源
+    public string dialogueContent;//对话内容文本
 }
