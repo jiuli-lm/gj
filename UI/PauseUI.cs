@@ -12,6 +12,6 @@ public class PauseUI : MonoBehaviour
     }
     public void NActivatePanel()  
     {  
-        panel.SetActive(false); // 激活Panel  
+        panel.SetActive(false); // 失活Panel  
     }
 }

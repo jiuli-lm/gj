@@ -5,9 +5,20 @@ public class TGParams
 {
     public string prompt;
 
-    //public string response;
+    [JsonProperty("user_input")]
+    public string user_input;
 
-    public List<string> history;
+    [JsonProperty("max_new_tokens")]
+    public int max_new_tokens;
+
+    public string mode = "chat";
+
+    public string preset = "Midnight Enigma";
+
+    public string character = "Lilith_test";
+
+    [JsonProperty("instruction_template")]
+    public string instruction_template = "ChatGLM";
 
     /*
     public float temperature;
@@ -22,18 +33,20 @@ public class TGParams
     public TGParams()
     {
         prompt = "";
-        history = new List<string>();
     }
-    public TGParams(string p, List<string> h)
+    public TGParams(string p, int m=256)
     {
         prompt = p;
-        history = h;
+        //userInput = new List<string>();
+        user_input=p;
+
+        max_new_tokens = m;
     }
 }
 
 public class TGResponse
 {
-    public string response;
+    public string text;
 
     public List<string> history;
 }

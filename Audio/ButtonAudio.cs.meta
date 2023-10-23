@@ -1,9 +1,11 @@
 fileFormatVersion: 2
-guid: 9e950b2f13e913842a46bb91de50d84d
+guid: 72c253500bcfc19438fcf352874a9331
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - buttonOverSound: {fileID: 8300000, guid: 1fc052bd47ba1484ebf5a84350a4a8d2, type: 3}
+  - button: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
